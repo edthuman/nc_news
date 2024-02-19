@@ -20,8 +20,6 @@ describe("/api", () => {
         .then(([endpointsOutput, jsonExpectedEndpoints]) => {
             const expectedEndpoints = JSON.parse(jsonExpectedEndpoints) 
 
-            console.log(endpointsOutput)
-            console.log(expectedEndpoints)
             expect(endpointsOutput).toEqual(expectedEndpoints);
         })
     })
