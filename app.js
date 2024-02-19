@@ -1,12 +1,14 @@
 const express = require("express")
 const { getTopics } = require("./controllers/topics.controllers")
 const { getEndpoints } = require("./controllers/api.controllers")
-const { getArticleById } = require("./controllers/articles.controllers")
+const { getArticleById, getArticles } = require("./controllers/articles.controllers")
 const app = express()
 
 app.get("/api", getEndpoints)
 
 app.get("/api/topics", getTopics)
+
+app.get("/api/articles", getArticles)
 
 app.get("/api/articles/:article_id", getArticleById)
 
@@ -31,8 +33,7 @@ app.use((error, request, response, next) => {
 })
 
 app.use((error, request, response, next) => {
-    console.log(error)
-    response.status(500).send({ msg: "Internal server error"})
+    
 })
 
 module.exports = app
