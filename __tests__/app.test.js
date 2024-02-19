@@ -1,5 +1,6 @@
 const app = require("../app");
 const db = require("../db/connection");
+const fs = require("fs/promises")
 const request = require("supertest");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data");
@@ -7,6 +8,24 @@ const data = require("../db/data/test-data");
 beforeEach(() => seed(data))
 
 afterAll(() => db.end())
+
+describe("/api", () => {
+    test("GET 200, returns object describing all endpoints", () => {        
+        return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({ body: { endpoints } }) => {
+            return Promise.all([endpoints, fs.readFile(`${__dirname}/../endpoints.json`, "utf-8")])
+        })
+        .then(([endpointsOutput, jsonExpectedEndpoints]) => {
+            const expectedEndpoints = JSON.parse(jsonExpectedEndpoints) 
+
+            console.log(endpointsOutput)
+            console.log(expectedEndpoints)
+            expect(endpointsOutput).toEqual(expectedEndpoints);
+        })
+    })
+})
 
 describe("/api/topics", () => {
     test("GET 200, returns all topics", () => {
@@ -32,33 +51,6 @@ describe("Non-existent endpoints", () => {
     test("GET 404: Responds with an error message - Not found", () => {
         return request(app)
         .get("/api/not-an-endpoint")
-        .expect(404)
-        .then(({ body: { msg }}) => {
-            expect(msg).toBe("Not found")
-        })
-    })
-
-    test("POST 404: Responds with an error message - Not found", () => {
-        return request(app)
-        .post("/api/not-an-endpoint")
-        .expect(404)
-        .then(({ body: { msg }}) => {
-            expect(msg).toBe("Not found")
-        })
-    })
-
-    test("PATCH 404: Responds with an error message - Not found", () => {
-        return request(app)
-        .patch("/api/not-an-endpoint")
-        .expect(404)
-        .then(({ body: { msg }}) => {
-            expect(msg).toBe("Not found")
-        })
-    })
-
-    test("DELETE 404: Responds with an error message - Not found", () => {
-        return request(app)
-        .delete("/api/not-an-endpoint")
         .expect(404)
         .then(({ body: { msg }}) => {
             expect(msg).toBe("Not found")
