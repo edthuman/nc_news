@@ -1,6 +1,5 @@
 const app = require("../app");
 const db = require("../db/connection");
-const fs = require("fs/promises")
 const request = require("supertest");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data");
@@ -14,13 +13,9 @@ describe("/api", () => {
         return request(app)
         .get("/api")
         .expect(200)
-        .then(({ body: { endpoints } }) => {
-            return Promise.all([endpoints, fs.readFile(`${__dirname}/../endpoints.json`, "utf-8")])
-        })
-        .then(([endpointsOutput, jsonExpectedEndpoints]) => {
-            const expectedEndpoints = JSON.parse(jsonExpectedEndpoints) 
-
-            expect(endpointsOutput).toEqual(expectedEndpoints);
+        .then(({ body: { endpoints }}) => {
+            const expectedEndpoints = require("../endpoints.json")
+            expect(endpoints).toEqual(expectedEndpoints);
         })
     })
 })
