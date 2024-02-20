@@ -127,6 +127,115 @@ describe("/api/articles", () => {
                 });
         });
 
+        test("PATCH 201: responds with the updated article object for a positive integer", () => {
+            const votePatch = { inc_votes: 1 }
+
+            return request(app)
+            .patch("/api/articles/1")
+            .send(votePatch)
+            .expect(201)
+            .then(({ body: { article }}) => {
+                expect(article).toMatchObject({
+                    title: "Living in the shadow of a great man",
+                    topic: "mitch",
+                    author: "butter_bridge",
+                    body: "I find this existence challenging",
+                    created_at: expect.any(String),
+                    votes: 101,
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+                })
+            })
+        });
+
+        test("PATCH 201: responds with the updated article object for a negative integer", () => {
+            const votePatch = { inc_votes: -50 }
+
+            return request(app)
+            .patch("/api/articles/1")
+            .send(votePatch)
+            .expect(201)
+            .then(({ body: { article }}) => {
+                expect(article).toMatchObject({
+                    title: "Living in the shadow of a great man",
+                    topic: "mitch",
+                    author: "butter_bridge",
+                    body: "I find this existence challenging",
+                    created_at: expect.any(String),
+                    votes: 50,
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+                })
+            })
+        });
+        
+        test("PATCH 400: responds with an error message when no object is given - Bad request", () => {
+            return request(app)
+            .patch("/api/articles/1")
+            .expect(400)
+            .then(({ body: { msg }}) => {
+                expect(msg).toBe("Bad request")
+            })
+        });
+        
+        test("PATCH 400: responds with an error message when object has no inc_votes key - Bad request", () => {
+            const noVotes = { key: "value" }
+            
+            return request(app)
+            .patch("/api/articles/1")
+            .send(noVotes)
+            .expect(400)
+            .then(({ body: { msg }}) => {
+                expect(msg).toBe("Bad request")
+            })
+        });
+
+        test("PATCH 400: responds with an error message when inc_votes is invalid - Bad request", () => {
+            const votePatch = { inc_value: "string" }
+            
+            return request(app)
+            .patch("/api/articles/1")
+            .send(votePatch)
+            .expect(400)
+            .then(({ body: { msg }}) => {
+                expect(msg).toBe("Bad request")
+            })
+        });
+
+        test("PATCH 400: responds with an error message when given an invalid article_id - Bad request", () => {
+            const votePatch = { inc_votes: 10 }
+            
+            return request(app)
+            .patch("/api/articles/not-a-number")
+            .send(votePatch)
+            .expect(400)
+            .then(({ body: { msg }}) => {
+                expect(msg).toBe("Bad request")
+            })
+        });
+
+        test("PATCH 404: responds with an error message when given a non-existent article_id - Not found", () => {
+            const votePatch = { inc_votes: 10 }
+            
+            return request(app)
+            .patch("/api/articles/321")
+            .send(votePatch)
+            .expect(404)
+            .then(({ body: { msg }}) => {
+                expect(msg).toBe("Not found")
+            })
+        });
+
+        test("PATCH 404: responds with an error message when given no article_id - Not found", () => {
+            const votePatch = { inc_votes: 10 }
+            
+            return request(app)
+            .patch("/api/articles/")
+            .send(votePatch)
+            .expect(404)
+            .then(({ body: { msg }}) => {
+                expect(msg).toBe("Not found")
+            })
+        });
+
         describe("/comments", () => {
             test("GET 200: responds with an array of comments for given article, sorted most recent first", () => {
                 return request(app)

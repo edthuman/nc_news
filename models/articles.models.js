@@ -1,6 +1,6 @@
 const db = require("../db/connection");
 
-exports.selectAllArticles = (request, response, next) => {
+exports.selectAllArticles = () => {
     return db
         .query(
             `
@@ -31,3 +31,16 @@ exports.selectArticleById = (id) => {
             return rows[0];
         });
 };
+
+exports.updateArticle = (id, votesIncrement) => {
+    return db.query(`
+    UPDATE articles
+    SET 
+    votes = votes + $1
+    WHERE article_id = $2
+    RETURNING *
+    `, [votesIncrement, id])
+    .then(({ rows }) => {
+        return rows[0]
+    })
+}
