@@ -114,6 +114,24 @@
     "description": "deletes a comment with given comment_id, serves no response",
     "queries": [],
     "exampleResponse": {}
+  },
+  "GET /api/users": {
+    "description": "serves an array of all users",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        { 
+        "username": "ilikecars", 
+        "name": "katie", 
+        "avatar_url": "https://images.pexels.com/photos/11556/photo.jpeg?w=700&h=700" 
+        },
+        { 
+        "username": "ilikecarstoo", 
+        "name": "megan", 
+        "avatar_url": "https://images.pexels.com/photos/14446/photo.jpeg?w=700&h=700" 
+        }
+      ]
+    }
   }
 }
 
