@@ -150,10 +150,13 @@ describe("/api/articles", () => {
                 })
             })
 
-            test("GET 204: responds with no content status when an article exists, but has no comments", () => {
+            test("GET 404: responds with an empty array when an article exists, but has no comments - Not found", () => {
                 return request(app)
                 .get("/api/articles/2/comments")
-                .expect(204)
+                .expect(404)
+                .then(({ body: { comments }}) => {
+                    expect(comments).toEqual([])
+                })
             })
 
             test("GET 400: responds with an error message when given invalid id - Bad request", () => {
@@ -173,8 +176,95 @@ describe("/api/articles", () => {
                     expect(msg).toBe("Not found");
                 });
             })
-        })
-    });
+
+            test("POST 201: responds with the new comment object", () => {
+                const comment = { username: "lurker", body: "I love this article so much"};
+
+                return request(app)
+                .post("/api/articles/2/comments")
+                .send(comment)
+                .expect(201)
+                .then(({ body: { comment }}) => {
+                    expect(comment).toMatchObject({
+                        comment_id: expect.any(Number),
+                        votes: 0,
+                        created_at: expect.any(String),
+                        author: "lurker",
+                        body: "I love this article so much",
+                        article_id: 2
+                    })
+                })
+            })
+
+            test("POST 400: responds with an error message when no object given - Bad request", () => {
+                return request(app)
+                .post("/api/articles/2/comments")
+                .send()
+                .expect(400)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Bad request")
+                })
+            });
+
+            test("POST 400: responds with an error message when object given is missing a key - Bad request", () => {
+                const comment = { body: "I love this article so much"};
+
+                return request(app)
+                .post("/api/articles/2/comments")
+                .send(comment)
+                .expect(400)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Bad request")
+                })
+            });
+
+            test("POST 400: responds with an error message when given an invalid article_id - Bad request", () => {
+                const comment = { username: "lurker", body: "I love this article so much"};
+                return request(app)
+                .post("/api/articles/not-a-number/comments")
+                .send(comment)
+                .expect(400)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Bad request")
+                })
+            })
+
+            test("POST 404: responds with an error message when given non-existent article_id - Not found", () => {
+                const comment = { username: "lurker", body: "I love this article so much"};
+                
+                return request(app)
+                .post("/api/articles/100/comments")
+                .send(comment)
+                .expect(404)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Not found")
+                })
+            });
+
+            test("POST 404: responds with an error message when given no article_id", () => {
+                const comment = { username: "lurker", body: "I love this article so much"};
+                return request(app)
+                .post("/api/articles//comments")
+                .send(comment)
+                .expect(404)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Not found")
+                })
+            })
+
+            test("POST 404: responds with an error message when username does not relate to an existing user - Not found", () => {
+                const comment = { username: "Jonathan", body: "I love this article so much"};
+
+                return request(app)
+                .post("/api/articles/2/comments")
+                .send(comment)
+                .expect(404)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Not found")
+                })
+            });
+        });
+    })
 });
 
 describe("Non-existent endpoints", () => {

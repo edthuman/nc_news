@@ -1,4 +1,5 @@
-const { selectArticleById, selectAllArticles, selectCommentsByArticle } = require("../models/articles.models")
+const { selectArticleById, selectAllArticles } = require("../models/articles.models")
+const { insertComment, selectCommentsByArticle } = require("../models/comments.model")
 
 exports.getArticles = (request, response, next) => {
     selectAllArticles()
@@ -28,10 +29,22 @@ exports.getCommentsByArticle = (request, response, next) => {
         const comments = result[0]
 
         if (comments.length === 0) {
-            response.status(204).send()
+            response.status(404).send({ comments })
+        } else {
+            response.status(200).send({ comments })
         }
-        
-        response.status(200).send({ comments })
+    })
+    .catch(next)
+}
+
+exports.postComment = (request, response, next) => {
+    const articleId = request.params.article_id
+    const username = request.body.username
+    const commentText = request.body.body
+
+    return insertComment(articleId, username, commentText)
+    .then((comment) => {
+        response.status(201).send({ comment })
     })
     .catch(next)
 }
