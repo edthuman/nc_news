@@ -37,18 +37,6 @@ exports.getCommentsByArticle = (request, response, next) => {
     .catch(next)
 }
 
-exports.postComment = (request, response, next) => {
-    const articleId = request.params.article_id
-    const username = request.body.username
-    const commentText = request.body.body
-
-    return insertComment(articleId, username, commentText)
-    .then((comment) => {
-        response.status(201).send({ comment })
-    })
-    .catch(next)
-}
-
 exports.patchArticle = (request, response, next) => {
     const articleId = request.params.article_id
     const votesIncrement = request.body.inc_votes
