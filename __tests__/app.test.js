@@ -109,6 +109,15 @@ describe("/api/articles", () => {
                 });
         });
 
+        test("GET 400: responds with an error message when given invalid id - Bad request", () => {
+            return request(app)
+                .get("/api/articles/not-a-number")
+                .expect(400)
+                .then(({ body: { msg } }) => {
+                    expect(msg).toBe("Bad request");
+                });
+        });
+
         test("GET 404: responds with an error message when given non-existent id - Not found", () => {
             return request(app)
                 .get("/api/articles/400")
@@ -118,14 +127,53 @@ describe("/api/articles", () => {
                 });
         });
 
-        test("GET 400: responds with an error message when given invalid id - Bad request", () => {
-            return request(app)
-                .get("/api/articles/not-a-number")
+        describe("/comments", () => {
+            test("GET 200: responds with an array of comments for given article, sorted most recent first", () => {
+                return request(app)
+                .get("/api/articles/3/comments")
+                .expect(200)
+                .then(({body: {comments}}) => {
+                    expect(comments).toHaveLength(2)
+                    
+                    comments.forEach((comment) => {
+                        expect(comment).toMatchObject({
+                            comment_id: expect.any(Number),
+                            votes: expect.any(Number),
+                            created_at: expect.any(String),
+                            author: expect.any(String),
+                            body: expect.any(String),
+                            article_id: 3
+                        })
+                    })
+
+                    expect(comments).toBeSortedBy("created_at", { descending: true })
+                })
+            })
+
+            test("GET 204: responds with no content status when an article exists, but has no comments", () => {
+                return request(app)
+                .get("/api/articles/2/comments")
+                .expect(204)
+            })
+
+            test("GET 400: responds with an error message when given invalid id - Bad request", () => {
+                return request(app)
+                .get("/api/articles/not-a-number/comments")
                 .expect(400)
                 .then(({ body: { msg } }) => {
                     expect(msg).toBe("Bad request");
                 });
-        });
+            })
+
+            test("GET 404: responds with an error message when given non-existent id - Not found", () => {
+                return request(app)
+                .get("/api/articles/321/comments")
+                .expect(404)
+                .then(({ body: { msg } }) => {
+                    expect(msg).toBe("Not found");
+                });
+            })
+        })
     });
 });
 
