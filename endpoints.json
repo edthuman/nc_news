@@ -78,6 +78,20 @@
         }
       ]
     }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "posts a comment to a given article, serves the added comment object",
+    "queries": [],
+    "exampleResponse": {
+      "comment":{
+          "comment_id": 2,
+          "votes": 0,
+          "created_at": "2018-05-30T15:59:13.341Z",
+          "author": "commenter1",
+          "body": "I liked this article",
+          "article_id": 2
+        }
+    }
   }
 }
 
