@@ -1,7 +1,7 @@
 const express = require("express")
 const { getTopics } = require("./controllers/topics.controllers")
 const { getEndpoints } = require("./controllers/api.controllers")
-const { getArticleById, getArticles } = require("./controllers/articles.controllers")
+const { getArticleById, getArticles, getCommentsByArticle } = require("./controllers/articles.controllers")
 const app = express()
 
 app.get("/api", getEndpoints)
@@ -11,6 +11,8 @@ app.get("/api/topics", getTopics)
 app.get("/api/articles", getArticles)
 
 app.get("/api/articles/:article_id", getArticleById)
+
+app.get("/api/articles/:article_id/comments", getCommentsByArticle)
 
 app.use("/*", (request, response, next) => {
     response.status(404).send({ msg: "Not found" })
@@ -37,3 +39,10 @@ app.use((error, request, response, next) => {
 })
 
 module.exports = app
+
+/*
+Consider errors 
+test for them.
+
+Remember to add a description of this endpoint to your /api endpoint. 
+*/
