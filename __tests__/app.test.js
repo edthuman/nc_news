@@ -145,6 +145,15 @@ describe("/api", () => {
                     });
             });
 
+            test("GET 200: returned object gives the correct comment count for article", () => {
+                return request(app)
+                .get("/api/articles/1")
+                .expect(200)
+                .then(({ body: { article } }) => {
+                    expect(article.comment_count).toBe(11)
+                });
+            });
+
             test("GET 400: responds with an error message when given invalid id - Bad request", () => {
                 return request(app)
                     .get("/api/articles/not-a-number")

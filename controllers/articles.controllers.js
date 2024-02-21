@@ -17,6 +17,7 @@ exports.getArticles = (request, response, next) => {
 
 exports.getArticleById = (request, response, next) => {
     const articleId = request.params.article_id
+    
     selectArticleById(articleId)
     .then((article) => {
         response.status(200).send({ article })
