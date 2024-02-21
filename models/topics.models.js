@@ -6,3 +6,13 @@ exports.selectAllTopics = () => {
         return rows;
     });
 }
+
+exports.selectTopicByName = (topic) => {
+    return db.query(`
+    SELECT * FROM topics
+    WHERE slug = $1;
+    `, [topic])
+    .then(({rows}) => {
+        return rows;
+    });
+}
