@@ -1,11 +1,18 @@
 const { selectArticleById, selectAllArticles, updateArticle } = require("../models/articles.models")
-const { insertComment, selectCommentsByArticle } = require("../models/comments.model")
+const { selectCommentsByArticle } = require("../models/comments.model")
 
 exports.getArticles = (request, response, next) => {
-    selectAllArticles()
+    const topic = request.query.topic
+
+    selectAllArticles(topic)
     .then((articles) => {
-        response.status(200).send({ articles })
+        if (articles.length === 0) {
+            response.status(404).send({ articles: []})
+        } else {
+            response.status(200).send({ articles })
+        }
     })
+    .catch(next)
 }
 
 exports.getArticleById = (request, response, next) => {

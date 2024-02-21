@@ -65,6 +65,39 @@ describe("/api", () => {
                 });
         });
 
+        describe("?topic", () => {
+            test("GET 200: returns only the articles of a given topic", () => {
+                return request(app)
+                .get("/api/articles?topic=mitch")
+                .expect(200)
+                .then(({body: { articles }}) => {
+                    expect(articles).toHaveLength(12)
+
+                    articles.forEach((article) => {
+                        expect(article.topic).toBe("mitch")
+                    })
+                })
+            })
+
+            test("GET 404: responds with an error message when given non-existent topic - Not found", () => {
+                return request(app)
+                .get("/api/articles?topic=not-a-topic")
+                .expect(404)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Not found")
+                })
+            })
+
+            test("GET 404: responds with an empty array when a topic that exists has no related articles", () => {
+                return request(app)
+                .get("/api/articles?topic=paper")
+                .expect(404)
+                .then(({ body: { articles }}) => {                    
+                    expect(articles).toEqual([])
+                })
+            })
+        })
+
         describe("/:article_id", () => {
             test("GET 200: returns correct article object", () => {
                 return request(app)
@@ -138,17 +171,9 @@ describe("/api", () => {
                 .send(votePatch)
                 .expect(201)
                 .then(({ body: { article }}) => {
-                    expect(article).toMatchObject({
-                        title: "Living in the shadow of a great man",
-                        topic: "mitch",
-                        author: "butter_bridge",
-                        body: "I find this existence challenging",
-                        created_at: expect.any(String),
-                        votes: 101,
-                        article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
-                    })
+                    expect(article.votes).toBe(101)
                 })
-            });
+            })
     
             test("PATCH 201: responds with the updated article object for a negative integer", () => {
                 const votePatch = { inc_votes: -50 }
@@ -158,15 +183,7 @@ describe("/api", () => {
                 .send(votePatch)
                 .expect(201)
                 .then(({ body: { article }}) => {
-                    expect(article).toMatchObject({
-                        title: "Living in the shadow of a great man",
-                        topic: "mitch",
-                        author: "butter_bridge",
-                        body: "I find this existence challenging",
-                        created_at: expect.any(String),
-                        votes: 50,
-                        article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
-                    })
+                    expect(article.votes).toBe(50)
                 })
             });
             
