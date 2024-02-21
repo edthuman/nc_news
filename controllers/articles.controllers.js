@@ -1,13 +1,21 @@
 const { selectArticleById, selectAllArticles, updateArticle } = require("../models/articles.models")
 const { selectCommentsByArticle } = require("../models/comments.model")
+const { selectTopicByName } = require("../models/topics.models")
 
 exports.getArticles = (request, response, next) => {
     const topic = request.query.topic
+    const promises = [selectAllArticles(topic)]
 
-    selectAllArticles(topic)
-    .then((articles) => {
+    if (topic) {
+        promises.push(selectTopicByName(topic))
+    }
+
+    return Promise.all(promises)
+    .then((returnedPromises) => {
+        const articles = returnedPromises[0]
+
         if (articles.length === 0) {
-            response.status(404).send({ articles: []})
+            response.status(404).send({ articles: [] })
         } else {
             response.status(200).send({ articles })
         }
