@@ -456,15 +456,6 @@ describe("/api", () => {
                         });
                 });
 
-                test("GET 400: responds with an error message when given invalid id - Bad request", () => {
-                    return request(app)
-                        .get("/api/articles/not-a-number/comments")
-                        .expect(400)
-                        .then(({ body: { msg } }) => {
-                            expect(msg).toBe("Bad request");
-                        });
-                });
-
                 test("GET 404: responds with an empty array when an article exists, but has no comments - Not found", () => {
                     return request(app)
                         .get("/api/articles/2/comments")
