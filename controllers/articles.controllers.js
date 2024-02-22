@@ -4,7 +4,9 @@ const { selectTopicByName } = require("../models/topics.models")
 
 exports.getArticles = (request, response, next) => {
     const topic = request.query.topic
-    const promises = [selectAllArticles(topic)]
+    const sort_by = request.query.sort_by || "created_at"
+    const order = request.query.order || "DESC"
+    const promises = [selectAllArticles(topic, sort_by, order)]
 
     if (topic) {
         promises.push(selectTopicByName(topic))
