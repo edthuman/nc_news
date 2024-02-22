@@ -132,6 +132,19 @@
         }
       ]
     }
+  },
+  "GET /api/users/:username": {
+    "description": "serves an object of the user with given username",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        { 
+        "username": "ilikecars", 
+        "name": "katie", 
+        "avatar_url": "https://images.pexels.com/photos/11556/photo.jpeg?w=700&h=700" 
+        }
+      ]
+    }
   }
 }
 
