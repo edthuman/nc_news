@@ -1,5 +1,4 @@
 const db = require("../db/connection");
-const { sort } = require("../db/data/test-data/articles");
 
 exports.selectAllArticles = (topic, sort_by, order) => {
     const validTopics = ["mitch", "cats", "paper"]
@@ -65,5 +64,20 @@ exports.updateArticle = (id, votesIncrement) => {
     `, [votesIncrement, id])
     .then(({ rows }) => {
         return rows[0]
+    })
+}
+
+exports.insertArticle = (author, title, body, topic, articleImgUrl) => {
+    return db.query(`
+    INSERT INTO articles
+        (author, title, body, topic, article_img_url)
+    VALUES
+        ($1, $2, $3, $4, $5)
+    RETURNING article_id;
+    `, [author, title, body, topic, articleImgUrl])
+    .then(({ rows }) => {
+        const postedArticleId = rows[0].article_id
+
+        return postedArticleId
     })
 }

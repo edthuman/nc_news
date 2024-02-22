@@ -65,6 +65,118 @@ describe("/api", () => {
                 });
         });
 
+        test("POST 201: returns the new article object", () => {
+            const newArticle = {
+                author: "lurker",
+                title: "Here's an article about cats",
+                body: "I like cats.",
+                topic: "cats",
+                article_img_url:
+                    "https://images.pexels.com/photos/15862.jpeg?w=700&h=700"
+            };
+
+            return request(app)
+                .post("/api/articles")
+                .send(newArticle)
+                .expect(201)
+                .then(({ body: { article } }) => {
+                    expect(article).toMatchObject({
+                        author: "lurker",
+                        title: "Here's an article about cats",
+                        body: "I like cats.",
+                        article_id: 14,
+                        topic: "cats",
+                        created_at: expect.any(String),
+                        votes: 0,
+                        article_img_url:
+                            "https://images.pexels.com/photos/15862.jpeg?w=700&h=700",
+                        comment_count: 0
+                    });
+                });
+        });
+
+        test("POST 201: posts an article with a default article_img_url when one is not given", () => {
+            const newArticle = {
+                author: "lurker",
+                title: "Here's an article about cats",
+                body: "I like cats.",
+                topic: "cats"
+            };
+
+            return request(app)
+                .post("/api/articles")
+                .send(newArticle)
+                .expect(201)
+                .then(({ body: { article } }) => {
+                    expect(article.article_img_url).toBe("https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700");
+                });
+        });
+
+        test("POST 400: returns an error when no body is sent - Bad request", () => {
+            return request(app)
+                .post("/api/articles")
+                .send()
+                .expect(400)
+                .then(({ body: { msg } }) => {
+                    expect(msg).toBe("Bad request")
+                });
+        });
+
+        test("POST 400: returns an error when the given object has a key missing - Bad request", () => {
+            const newArticle = {
+                title: "Here's an article about cats",
+                body: "I like cats.",
+                topic: "cats"
+            };
+            //author key not present
+            
+            return request(app)
+                .post("/api/articles")
+                .send(newArticle)
+                .expect(400)
+                .then(({ body: { msg } }) => {
+                    expect(msg).toBe("Bad request")
+                });
+        });
+
+        test("POST 404: returns an error when the given object gives a non-existent author - Not found", () => {
+            const newArticle = {
+                author: "jessica",
+                title: "Here's an article about cats",
+                body: "I like cats.",
+                topic: "cats",
+                article_img_url:
+                    "https://images.pexels.com/photos/15862.jpeg?w=700&h=700"
+            };
+            
+            return request(app)
+                .post("/api/articles")
+                .send(newArticle)
+                .expect(404)
+                .then(({ body: { msg } }) => {
+                    expect(msg).toBe("Not found")
+                });
+        });
+
+        test("POST 404: returns an error when the given object gives a non-existent topic - Not found", () => {
+            const newArticle = {
+                author: "lurker",
+                title: "Here's an article about cats",
+                body: "I like cats.",
+                topic: "not-a-topic",
+                article_img_url:
+                    "https://images.pexels.com/photos/15862.jpeg?w=700&h=700"
+            };
+            
+            return request(app)
+                .post("/api/articles")
+                .send(newArticle)
+                .expect(404)
+                .then(({ body: { msg } }) => {
+                    expect(msg).toBe("Not found")
+                });
+        });
+
         describe("?topic", () => {
             test("GET 200: returns only the articles of a given topic", () => {
                 return request(app)

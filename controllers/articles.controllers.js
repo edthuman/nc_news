@@ -1,4 +1,4 @@
-const { selectArticleById, selectAllArticles, updateArticle } = require("../models/articles.models")
+const { selectArticleById, selectAllArticles, updateArticle, insertArticle } = require("../models/articles.models")
 const { selectCommentsByArticle } = require("../models/comments.model")
 const { selectTopicByName } = require("../models/topics.models")
 
@@ -65,6 +65,20 @@ exports.patchArticle = (request, response, next) => {
     })
     .then((article) => {
         response.status(200).send({ article })
+    })
+    .catch(next)
+}
+
+exports.postArticle = (request, response, next) => {
+    const { author, title, body, topic } = request.body
+    const articleImgUrl= request.body.article_img_url || "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+    
+    insertArticle(author, title, body, topic, articleImgUrl)
+    .then((articleId) => {
+        return selectArticleById(articleId);
+    })
+    .then((article) => {
+        response.status(201).send({ article })
     })
     .catch(next)
 }
