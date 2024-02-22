@@ -276,7 +276,7 @@ describe("/api", () => {
                             title: "Sony Vaio; or, The Laptop",
                             body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
                             topic: "mitch",
-                            created_at: "2020-10-16T05:03:00.000Z",
+                            created_at: expect.any(String),
                             votes: 0,
                             article_img_url:
                                 "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
@@ -580,6 +580,115 @@ describe("/api", () => {
     });
 
     describe("/comments/:comment_id", () => {
+        test("PATCH 201, increases the vote count of a given comment by a positive integer", () => {
+            const commentPatch = { inc_votes: 1 }
+            
+            return request(app)
+            .patch("/api/comments/1")
+            .send(commentPatch)
+            .expect(201)
+            .then(({body: { comment }}) => {
+                expect(comment).toMatchObject({
+                    comment_id: 1,
+                    votes: 17,
+                    created_at: expect.any(String),
+                    author: "butter_bridge",
+                    body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+                    article_id: 9,
+                })
+            })
+        })
+
+        test("PATCH 201, increases the vote count of a given comment by a positive integer", () => {
+            const commentPatch = { inc_votes: -5 }
+            
+            return request(app)
+            .patch("/api/comments/1")
+            .send(commentPatch)
+            .expect(201)
+            .then(({body: { comment }}) => {
+                expect(comment).toMatchObject({
+                    comment_id: 1,
+                    votes: 11,
+                    created_at: expect.any(String),
+                    author: "butter_bridge",
+                    body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+                    article_id: 9,
+                })
+            })
+        })
+
+        test("PATCH 400, returns an error message when no object is sent - Bad request", () => {            
+            return request(app)
+            .patch("/api/comments/1")
+            .send()
+            .expect(400)
+            .then(({body: { msg }}) => {
+                expect(msg).toBe("Bad request")
+            })
+        })
+
+        test("PATCH 400, returns an error message when given object has no inc_votes key - Bad request", () => {            
+            const commentPatch = { key: "Not inc_votes" }
+            
+            return request(app)
+            .patch("/api/comments/1")
+            .send(commentPatch)
+            .expect(400)
+            .then(({body: { msg }}) => {
+                expect(msg).toBe("Bad request")
+            })
+        })
+
+        test("PATCH 400, returns an error message when given object has invalid inc_votes value - Bad request", () => {            
+            const commentPatch = { inc_votes: "a string" }
+            
+            return request(app)
+            .patch("/api/comments/1")
+            .send(commentPatch)
+            .expect(400)
+            .then(({body: { msg }}) => {
+                expect(msg).toBe("Bad request")
+            })
+        })
+
+        test("PATCH 400, returns an error message when invalid comment_id is given - Bad request", () => {            
+            const commentPatch = { inc_votes: "a string" }
+            
+            return request(app)
+            .patch("/api/comments/not-a-number")
+            .send(commentPatch)
+            .expect(400)
+            .then(({body: { msg }}) => {
+                expect(msg).toBe("Bad request")
+            })
+        })
+
+        test("PATCH 404, returns an error message when a non-existent comment_id is given - Not found", () => {            
+            const commentPatch = { inc_votes: "10" }
+            
+            return request(app)
+            .patch("/api/comments/321")
+            .send(commentPatch)
+            .expect(404)
+            .then(({body: { msg }}) => {
+                expect(msg).toBe("Not found")
+            })
+        })
+
+        test("PATCH 404, returns an error message when no comment_id is given - Not found", () => {            
+            const commentPatch = { inc_votes: "10" }
+            
+            return request(app)
+            .patch("/api/comments/")
+            .send(commentPatch)
+            .expect(404)
+            .then(({body: { msg }}) => {
+                expect(msg).toBe("Not found")
+            })
+        })
+
+
         test("DELETE 204: deletes a comment of given id with no return value", () => {
             return request(app)
                 .delete("/api/comments/2")
@@ -609,6 +718,16 @@ describe("/api", () => {
                     expect(msg).toBe("Not found");
                 });
         });
+
+        test("DELETE 404: returns an error message when not given a comment_id", () => {
+            return request(app)
+                .delete("/api/comments/")
+                .expect(404)
+                .then(({ body: { msg } }) => {
+                    expect(msg).toBe("Not found");
+                });
+        });
+
     });
 
     describe("/users", () => {

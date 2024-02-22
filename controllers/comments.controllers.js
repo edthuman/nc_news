@@ -1,4 +1,4 @@
-const { removeComment, insertComment } = require("../models/comments.model")
+const { removeComment, insertComment, updateComment } = require("../models/comments.model")
 
 exports.postComment = (request, response, next) => {
     const articleId = request.params.article_id
@@ -18,4 +18,15 @@ exports.deleteComment = (request, response, next) => {
     .then(() => {
         response.status(204).send()
     }).catch(next)
+}
+
+exports.patchComment = (request, response, next) => {
+    const commentId = request.params.comment_id
+    const voteIncrement = request.body.inc_votes
+
+    updateComment(commentId, voteIncrement)
+    .then((comment) => {
+        response.status(201).send({ comment })
+    })
+    .catch(next)
 }
