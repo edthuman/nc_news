@@ -626,8 +626,61 @@ describe("/api", () => {
                             avatar_url: expect.any(String),
                         });
                     });
-                });
+            });
         });
+
+        describe("/:username", () => {
+            test("GET 200: returns the correct user when given a username", () => {
+                return request(app)
+                .get("/api/users/rogersop")
+                .expect(200)
+                .then(({ body: { user }}) => {
+                    expect(user).toMatchObject({
+                        username: 'rogersop',
+                        name: 'paul',
+                        avatar_url: 'https://avatars2.githubusercontent.com/u/24394918?s=400&v=4'
+                    })
+                })
+            })
+
+            test("GET 200: returns an array of all users when given no input", () => {
+                return request(app)
+                    .get("/api/users/")
+                    .expect(200)
+                    .then(({ body: { users } }) => {
+                        expect(users).toHaveLength(4);
+    
+                        users.forEach((user) => {
+                            expect(user).toMatchObject({
+                                username: expect.any(String),
+                                name: expect.any(String),
+                                avatar_url: expect.any(String),
+                            });
+                        });
+                });
+            });
+
+            test("GET 404: responds with an error message when given a non-existent username", () => {
+                return request(app)
+                .get("/api/users/fake-name")
+                .expect(404)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Not found")
+                })
+            })
+            //no input - returns all
+        })
+
+/*
+/api/users/:username.
+return a user by username.
+
+returns with:
+username
+avatar_url
+name
+*/
+        
     });
 });
 
