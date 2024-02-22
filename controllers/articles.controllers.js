@@ -64,7 +64,7 @@ exports.patchArticle = (request, response, next) => {
         return updateArticle(articleId, votesIncrement)
     })
     .then((article) => {
-        response.status(201).send({ article })
+        response.status(200).send({ article })
     })
     .catch(next)
 }

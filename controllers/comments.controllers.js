@@ -26,7 +26,7 @@ exports.patchComment = (request, response, next) => {
 
     updateComment(commentId, voteIncrement)
     .then((comment) => {
-        response.status(201).send({ comment })
+        response.status(200).send({ comment })
     })
     .catch(next)
 }
