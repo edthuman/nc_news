@@ -1,11 +1,12 @@
 const db = require("../db/connection");
 
-exports.selectAllArticles = (topic, sort_by, order) => {
+exports.selectAllArticles = (topic, sort_by, order, limit, pageNumber) => {
     const validTopics = ["mitch", "cats", "paper"]
     const validSortOptions = ["author", "title", "article_id", "topic", "created_at",
 "votes", "article_img_url", "comment_count"]
     let topicQuery = ""
     let sortQuery = ""
+    let limitQuery = ""
 
     if (validTopics.includes(topic)) {
         topicQuery += `WHERE topic = '${topic}'`
@@ -25,16 +26,35 @@ exports.selectAllArticles = (topic, sort_by, order) => {
         return Promise.reject({ status: 400, msg: "Bad request"})
     }
 
-    return db
-        .query(`
-            SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, CAST (COUNT(comment_id) AS INTEGER) AS comment_count FROM articles
-            LEFT JOIN comments ON articles.article_id = comments.article_id
-            ${topicQuery}
-            GROUP BY articles.article_id
-            ORDER BY ${sortQuery};
-        `)
-        .then(({ rows }) => {
-            return rows;
+    if (Number(limit) > 0) {
+        limitQuery += `LIMIT ${limit} OFFSET ${limit * (pageNumber - 1)}`
+    } else if (Number(limit) <= 0 && limit !== "") {
+        return Promise.reject({ status: 400, msg: "Bad request"})
+    } else if (limit !== undefined && limit !== "") {
+        return Promise.reject({ status: 400, msg: "Bad request"})
+    }
+
+    const lengthOfResults = db.query(`
+    SELECT COUNT(*) FROM articles
+    ${topicQuery};
+    `)
+
+    const arrayOutputQuery = db.query(`
+    SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, CAST (COUNT(comment_id) AS INTEGER) AS comment_count FROM articles
+    LEFT JOIN comments ON articles.article_id = comments.article_id
+    ${topicQuery}
+    GROUP BY articles.article_id
+    ORDER BY ${sortQuery}
+    ${limitQuery};
+    `)
+
+    return Promise.all([arrayOutputQuery, lengthOfResults])
+        .then((response) => {
+            const articles = response[0].rows
+            const total_count = Number(response[1].rows[0].count)
+
+            return [ articles, total_count ]
+
         });
 };
 

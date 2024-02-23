@@ -42,7 +42,7 @@ describe("/api", () => {
             return request(app)
                 .get("/api/articles")
                 .expect(200)
-                .then(({ body: { articles } }) => {
+                .then(({ body: { articles } }) => {                    
                     expect(articles).toHaveLength(13);
                     expect(articles).toBeSortedBy("created_at", {
                         descending: true,
@@ -72,7 +72,7 @@ describe("/api", () => {
                 body: "I like cats.",
                 topic: "cats",
                 article_img_url:
-                    "https://images.pexels.com/photos/15862.jpeg?w=700&h=700"
+                    "https://images.pexels.com/photos/15862.jpeg?w=700&h=700",
             };
 
             return request(app)
@@ -90,7 +90,7 @@ describe("/api", () => {
                         votes: 0,
                         article_img_url:
                             "https://images.pexels.com/photos/15862.jpeg?w=700&h=700",
-                        comment_count: 0
+                        comment_count: 0,
                     });
                 });
         });
@@ -100,7 +100,7 @@ describe("/api", () => {
                 author: "lurker",
                 title: "Here's an article about cats",
                 body: "I like cats.",
-                topic: "cats"
+                topic: "cats",
             };
 
             return request(app)
@@ -108,7 +108,9 @@ describe("/api", () => {
                 .send(newArticle)
                 .expect(201)
                 .then(({ body: { article } }) => {
-                    expect(article.article_img_url).toBe("https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700");
+                    expect(article.article_img_url).toBe(
+                        "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+                    );
                 });
         });
 
@@ -118,7 +120,7 @@ describe("/api", () => {
                 .send()
                 .expect(400)
                 .then(({ body: { msg } }) => {
-                    expect(msg).toBe("Bad request")
+                    expect(msg).toBe("Bad request");
                 });
         });
 
@@ -126,16 +128,16 @@ describe("/api", () => {
             const newArticle = {
                 title: "Here's an article about cats",
                 body: "I like cats.",
-                topic: "cats"
+                topic: "cats",
             };
             //author key not present
-            
+
             return request(app)
                 .post("/api/articles")
                 .send(newArticle)
                 .expect(400)
                 .then(({ body: { msg } }) => {
-                    expect(msg).toBe("Bad request")
+                    expect(msg).toBe("Bad request");
                 });
         });
 
@@ -146,15 +148,15 @@ describe("/api", () => {
                 body: "I like cats.",
                 topic: "cats",
                 article_img_url:
-                    "https://images.pexels.com/photos/15862.jpeg?w=700&h=700"
+                    "https://images.pexels.com/photos/15862.jpeg?w=700&h=700",
             };
-            
+
             return request(app)
                 .post("/api/articles")
                 .send(newArticle)
                 .expect(404)
                 .then(({ body: { msg } }) => {
-                    expect(msg).toBe("Not found")
+                    expect(msg).toBe("Not found");
                 });
         });
 
@@ -165,17 +167,189 @@ describe("/api", () => {
                 body: "I like cats.",
                 topic: "not-a-topic",
                 article_img_url:
-                    "https://images.pexels.com/photos/15862.jpeg?w=700&h=700"
+                    "https://images.pexels.com/photos/15862.jpeg?w=700&h=700",
             };
-            
+
             return request(app)
                 .post("/api/articles")
                 .send(newArticle)
                 .expect(404)
                 .then(({ body: { msg } }) => {
-                    expect(msg).toBe("Not found")
+                    expect(msg).toBe("Not found");
                 });
         });
+
+        describe ("?limit", () => {
+            test("GET 200: returns an array of 10 articles by default", () => {
+                return request(app)
+                    .get("/api/articles?limit")
+                    .expect(200)
+                    .then(({ body }) => {
+                        expect(body.articles).toHaveLength(10);
+                        expect(body.total_count).toBe(13);
+                    });
+            });
+
+            test("GET 200: returns the given number of articles when queried", () => {
+                return request(app)
+                    .get("/api/articles?limit=2")
+                    .expect(200)
+                    .then(({ body }) => {
+                        expect(body.articles).toHaveLength(2);
+                        expect(body.total_count).toBe(13);
+                    });
+            });
+
+            test("GET 200: returns the given number of articles when queried with limit and another query", () => {
+                return request(app)
+                    .get("/api/articles?limit=4&sort_by=author")
+                    .expect(200)
+                    .then(({ body }) => {
+                        expect(body.articles).toHaveLength(4);
+                        expect(body.total_count).toBe(13);
+                        expect(body.articles).toBeSortedBy("author", { descending: true })
+                    });
+            });
+
+            
+            test("GET 200: returns the correct total_count when another query reduces number of results", () => {
+                return request(app)
+                    .get("/api/articles?limit=4&topic=mitch")
+                    .expect(200)
+                    .then(({ body }) => {
+                        expect(body.articles).toHaveLength(4);
+                        expect(body.total_count).toBe(12);
+                        expect(body.articles).toBeSortedBy("author", { descending: true })
+                    });
+            });
+
+            test("GET 200: returns one page of articles when limit given is greater than the number of search results", () => {
+                return request(app)
+                    .get("/api/articles?limit=20")
+                    .expect(200)
+                    .then(({ body }) => {
+                        expect(body.articles).toHaveLength(13);
+                        expect(body.total_count).toBe(13);
+                    });
+            });
+
+            test("GET 200: returns one page of articles when limit given is greater than the number of search results", () => {
+                return request(app)
+                    .get("/api/articles?limit=20")
+                    .expect(200)
+                    .then(({ body }) => {
+                        expect(body.articles).toHaveLength(13);
+                        expect(body.total_count).toBe(13);
+                    });
+            });
+
+            test("GET 400: responds with an error message when queried with limit 0", () => {
+                return request(app)
+                    .get("/api/articles?limit=0")
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("Bad request");
+                    });
+            });
+
+            test("GET 400: responds with an error message when queried with a limit below 0", () => {
+                return request(app)
+                    .get("/api/articles?limit=-2")
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("Bad request");
+                    });
+            });
+
+            test("GET 400: responds with an error message when queried with an invalid limit", () => {
+                return request(app)
+                    .get("/api/articles?limit=not-a-number")
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("Bad request");
+                    });
+            });
+        });
+
+        describe("?p" , () => {
+            test("GET 200, returns the first page when queried with 1", () => {
+                return request(app)
+                .get("/api/articles?sort_by=article_id&order=ASC&p=1")
+                .expect(200)
+                .then(({ body: { articles }}) => {
+                    expect(articles.length).toBe(10)
+                    
+                    articles.forEach((article) => {
+                        expect(article.article_id).toBeGreaterThanOrEqual(1)
+                        expect(article.article_id).toBeLessThanOrEqual(10)
+                    })
+                })
+            })
+
+            test("GET 200, returns the first page when given an empty query", () => {
+                return request(app)
+                .get("/api/articles?sort_by=article_id&order=ASC&p=")
+                .expect(200)
+                .then(({ body: { articles }}) => {
+                    expect(articles.length).toBe(10)
+                    
+                    articles.forEach((article) => {
+                        expect(article.article_id).toBeGreaterThanOrEqual(1)
+                        expect(article.article_id).toBeLessThanOrEqual(10)
+                    })
+                })
+            })
+
+            test("GET 200, returns any given page number", () => {
+                return request(app)
+                .get("/api/articles?sort_by=article_id&order=ASC&limit=2&p=4")
+                .expect(200)
+                .then(({ body: { articles }}) => {
+                    expect(articles.length).toBe(2)
+                    
+                    articles.forEach((article) => {
+                        expect(article.article_id).toBeGreaterThanOrEqual(7)
+                        expect(article.article_id).toBeLessThanOrEqual(8)
+                    })
+                })
+            })
+
+            test("GET 400, responds with an error message when given query of 0", () => {
+                return request(app)
+                .get("/api/articles?p=0")
+                .expect(400)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Bad request")
+                })
+            })
+
+            test("GET 400, responds with an error message when given query of a negative number", () => {
+                return request(app)
+                .get("/api/articles?p=-10")
+                .expect(400)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Bad request")
+                })
+            })
+
+            test("GET 400, responds with an error message when given an invalid page number", () => {
+                return request(app)
+                .get("/api/articles?p=not-a-number")
+                .expect(400)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Bad request")
+                })
+            })
+
+            test("GET 404, responds with an empty array when given a page that features no results", () => {
+                return request(app)
+                .get("/api/articles?p=100")
+                .expect(404)
+                .then(({ body: { articles }}) => {
+                    expect(articles).toHaveLength(0)
+                })
+            })
+        })
 
         describe("?topic", () => {
             test("GET 200: returns only the articles of a given topic", () => {

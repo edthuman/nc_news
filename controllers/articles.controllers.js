@@ -6,7 +6,16 @@ exports.getArticles = (request, response, next) => {
     const topic = request.query.topic
     const sort_by = request.query.sort_by || "created_at"
     const order = request.query.order || "DESC"
-    const promises = [selectAllArticles(topic, sort_by, order)]
+    let limit = "" 
+    let pageNumber = ""
+
+    if (Object.hasOwn(request.query, "limit") || Object.hasOwn(request.query, "p")) {
+        limit = request.query.limit || "10"
+        pageNumber = request.query.p || "1"
+    }
+
+    const promises = [selectAllArticles(topic, sort_by, order, limit, pageNumber)]
+    
 
     if (topic) {
         promises.push(selectTopicByName(topic))
@@ -14,12 +23,19 @@ exports.getArticles = (request, response, next) => {
 
     return Promise.all(promises)
     .then((returnedPromises) => {
-        const articles = returnedPromises[0]
+        const articles = returnedPromises[0][0]
+        const total_count = returnedPromises[0][1]
 
         if (articles.length === 0) {
-            response.status(404).send({ articles: [] })
+            response.status(404).send({ 
+                articles: [], 
+                total_count: 0 
+            })
         } else {
-            response.status(200).send({ articles })
+            response.status(200).send({ 
+                articles, 
+                total_count 
+            })
         }
     })
     .catch(next)
