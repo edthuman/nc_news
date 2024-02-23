@@ -35,6 +35,43 @@ describe("/api", () => {
                     });
                 });
         });
+
+        test("POST 201: returns the newly added topic object", () => {
+            const newTopic = { slug: "topic name", description: "what new topic is" }
+            
+            return request(app)
+                .post("/api/topics")
+                .send(newTopic)
+                .expect(201)
+                .then(({ body: { topic } }) => {
+                    expect(topic).toMatchObject({ slug: "topic name", description: "what new topic is" });
+                });
+        });
+
+        test("POST 400: returns an error when no body is sent - Bad request", () => {
+            return request(app)
+                .post("/api/topics")
+                .send()
+                .expect(400)
+                .then(({ body: { msg } }) => {
+                    expect(msg).toBe("Bad request");
+                });
+        });
+
+        test("POST 400: returns an error when the given object has a key missing - Bad request", () => {
+            const newTopic = {
+                slug: "An indescribable topic"
+            };
+            //description key not present
+
+            return request(app)
+                .post("/api/topics")
+                .send(newTopic)
+                .expect(400)
+                .then(({ body: { msg } }) => {
+                    expect(msg).toBe("Bad request");
+                });
+        });
     });
 
     describe("/articles", () => {
@@ -42,7 +79,7 @@ describe("/api", () => {
             return request(app)
                 .get("/api/articles")
                 .expect(200)
-                .then(({ body: { articles } }) => {                    
+                .then(({ body: { articles } }) => {
                     expect(articles).toHaveLength(13);
                     expect(articles).toBeSortedBy("created_at", {
                         descending: true,
@@ -179,7 +216,7 @@ describe("/api", () => {
                 });
         });
 
-        describe ("?limit", () => {
+        describe("?limit", () => {
             test("GET 200: returns an array of 10 articles by default", () => {
                 return request(app)
                     .get("/api/articles?limit")
@@ -207,11 +244,12 @@ describe("/api", () => {
                     .then(({ body }) => {
                         expect(body.articles).toHaveLength(4);
                         expect(body.total_count).toBe(13);
-                        expect(body.articles).toBeSortedBy("author", { descending: true })
+                        expect(body.articles).toBeSortedBy("author", {
+                            descending: true,
+                        });
                     });
             });
 
-            
             test("GET 200: returns the correct total_count when another query reduces number of results", () => {
                 return request(app)
                     .get("/api/articles?limit=4&topic=mitch")
@@ -219,7 +257,9 @@ describe("/api", () => {
                     .then(({ body }) => {
                         expect(body.articles).toHaveLength(4);
                         expect(body.total_count).toBe(12);
-                        expect(body.articles).toBeSortedBy("author", { descending: true })
+                        expect(body.articles).toBeSortedBy("author", {
+                            descending: true,
+                        });
                     });
             });
 
@@ -261,85 +301,93 @@ describe("/api", () => {
             });
         });
 
-        describe("?p" , () => {
+        describe("?p", () => {
             test("GET 200, returns the first page when queried with 1", () => {
                 return request(app)
-                .get("/api/articles?sort_by=article_id&order=ASC&p=1")
-                .expect(200)
-                .then(({ body: { articles }}) => {
-                    expect(articles.length).toBe(10)
-                    
-                    articles.forEach((article) => {
-                        expect(article.article_id).toBeGreaterThanOrEqual(1)
-                        expect(article.article_id).toBeLessThanOrEqual(10)
-                    })
-                })
-            })
+                    .get("/api/articles?sort_by=article_id&order=ASC&p=1")
+                    .expect(200)
+                    .then(({ body: { articles } }) => {
+                        expect(articles.length).toBe(10);
+
+                        articles.forEach((article) => {
+                            expect(article.article_id).toBeGreaterThanOrEqual(
+                                1
+                            );
+                            expect(article.article_id).toBeLessThanOrEqual(10);
+                        });
+                    });
+            });
 
             test("GET 200, returns the first page when given an empty query", () => {
                 return request(app)
-                .get("/api/articles?sort_by=article_id&order=ASC&p=")
-                .expect(200)
-                .then(({ body: { articles }}) => {
-                    expect(articles.length).toBe(10)
-                    
-                    articles.forEach((article) => {
-                        expect(article.article_id).toBeGreaterThanOrEqual(1)
-                        expect(article.article_id).toBeLessThanOrEqual(10)
-                    })
-                })
-            })
+                    .get("/api/articles?sort_by=article_id&order=ASC&p=")
+                    .expect(200)
+                    .then(({ body: { articles } }) => {
+                        expect(articles.length).toBe(10);
+
+                        articles.forEach((article) => {
+                            expect(article.article_id).toBeGreaterThanOrEqual(
+                                1
+                            );
+                            expect(article.article_id).toBeLessThanOrEqual(10);
+                        });
+                    });
+            });
 
             test("GET 200, returns any given page number", () => {
                 return request(app)
-                .get("/api/articles?sort_by=article_id&order=ASC&limit=2&p=4")
-                .expect(200)
-                .then(({ body: { articles }}) => {
-                    expect(articles.length).toBe(2)
-                    
-                    articles.forEach((article) => {
-                        expect(article.article_id).toBeGreaterThanOrEqual(7)
-                        expect(article.article_id).toBeLessThanOrEqual(8)
-                    })
-                })
-            })
+                    .get(
+                        "/api/articles?sort_by=article_id&order=ASC&limit=2&p=4"
+                    )
+                    .expect(200)
+                    .then(({ body: { articles } }) => {
+                        expect(articles.length).toBe(2);
+
+                        articles.forEach((article) => {
+                            expect(article.article_id).toBeGreaterThanOrEqual(
+                                7
+                            );
+                            expect(article.article_id).toBeLessThanOrEqual(8);
+                        });
+                    });
+            });
 
             test("GET 400, responds with an error message when given query of 0", () => {
                 return request(app)
-                .get("/api/articles?p=0")
-                .expect(400)
-                .then(({ body: { msg }}) => {
-                    expect(msg).toBe("Bad request")
-                })
-            })
+                    .get("/api/articles?p=0")
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("Bad request");
+                    });
+            });
 
             test("GET 400, responds with an error message when given query of a negative number", () => {
                 return request(app)
-                .get("/api/articles?p=-10")
-                .expect(400)
-                .then(({ body: { msg }}) => {
-                    expect(msg).toBe("Bad request")
-                })
-            })
+                    .get("/api/articles?p=-10")
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("Bad request");
+                    });
+            });
 
             test("GET 400, responds with an error message when given an invalid page number", () => {
                 return request(app)
-                .get("/api/articles?p=not-a-number")
-                .expect(400)
-                .then(({ body: { msg }}) => {
-                    expect(msg).toBe("Bad request")
-                })
-            })
+                    .get("/api/articles?p=not-a-number")
+                    .expect(400)
+                    .then(({ body: { msg } }) => {
+                        expect(msg).toBe("Bad request");
+                    });
+            });
 
             test("GET 404, responds with an empty array when given a page that features no results", () => {
                 return request(app)
-                .get("/api/articles?p=100")
-                .expect(404)
-                .then(({ body: { articles }}) => {
-                    expect(articles).toHaveLength(0)
-                })
-            })
-        })
+                    .get("/api/articles?p=100")
+                    .expect(404)
+                    .then(({ body: { articles } }) => {
+                        expect(articles).toHaveLength(0);
+                    });
+            });
+        });
 
         describe("?topic", () => {
             test("GET 200: returns only the articles of a given topic", () => {
@@ -852,62 +900,62 @@ describe("/api", () => {
                         });
                 });
 
-                describe("?limit" , () => {
-                        test("GET 200: returns an array of 10 comments by default", () => {
-                            return request(app)
-                                .get("/api/articles/1/comments?limit")
-                                .expect(200)
-                                .then(({ body: { comments } }) => {
-                                    expect(comments).toHaveLength(10);
-                                });
-                        });
-            
-                        test("GET 200: returns the given number of comments when queried", () => {
-                            return request(app)
-                                .get("/api/articles/1/comments?limit=5")
-                                .expect(200)
-                                .then(({ body: { comments } }) => {
-                                    expect(comments).toHaveLength(5);
-                                });
-                        });
-            
-                        test("GET 200: returns one page of comments when limit given is greater than the number of search results", () => {
-                            return request(app)
-                                .get("/api/articles/1/comments?limit=20")
-                                .expect(200)
-                                .then(({ body: { comments } }) => {
-                                    expect(comments).toHaveLength(11);
-                                });
-                        });
+                describe("?limit", () => {
+                    test("GET 200: returns an array of 10 comments by default", () => {
+                        return request(app)
+                            .get("/api/articles/1/comments?limit")
+                            .expect(200)
+                            .then(({ body: { comments } }) => {
+                                expect(comments).toHaveLength(10);
+                            });
+                    });
 
-                        test("GET 400: responds with an error message when queried with limit 0", () => {
-                            return request(app)
-                                .get("/api/articles/2/comments?limit=0")
-                                .expect(400)
-                                .then(({ body: { msg } }) => {
-                                    expect(msg).toBe("Bad request");
-                                });
-                        });
-            
-                        test("GET 400: responds with an error message when queried with a limit below 0", () => {
-                            return request(app)
-                                .get("/api/articles/2/comments?limit=-2")
-                                .expect(400)
-                                .then(({ body: { msg } }) => {
-                                    expect(msg).toBe("Bad request");
-                                });
-                        });
-            
-                        test("GET 400: responds with an error message when queried with an invalid limit", () => {
-                            return request(app)
-                                .get("/api/articles/2/comments?limit=not-a-number")
-                                .expect(400)
-                                .then(({ body: { msg } }) => {
-                                    expect(msg).toBe("Bad request");
-                                });
-                        });
+                    test("GET 200: returns the given number of comments when queried", () => {
+                        return request(app)
+                            .get("/api/articles/1/comments?limit=5")
+                            .expect(200)
+                            .then(({ body: { comments } }) => {
+                                expect(comments).toHaveLength(5);
+                            });
+                    });
+
+                    test("GET 200: returns one page of comments when limit given is greater than the number of search results", () => {
+                        return request(app)
+                            .get("/api/articles/1/comments?limit=20")
+                            .expect(200)
+                            .then(({ body: { comments } }) => {
+                                expect(comments).toHaveLength(11);
+                            });
+                    });
+
+                    test("GET 400: responds with an error message when queried with limit 0", () => {
+                        return request(app)
+                            .get("/api/articles/2/comments?limit=0")
+                            .expect(400)
+                            .then(({ body: { msg } }) => {
+                                expect(msg).toBe("Bad request");
+                            });
+                    });
+
+                    test("GET 400: responds with an error message when queried with a limit below 0", () => {
+                        return request(app)
+                            .get("/api/articles/2/comments?limit=-2")
+                            .expect(400)
+                            .then(({ body: { msg } }) => {
+                                expect(msg).toBe("Bad request");
+                            });
+                    });
+
+                    test("GET 400: responds with an error message when queried with an invalid limit", () => {
+                        return request(app)
+                            .get("/api/articles/2/comments?limit=not-a-number")
+                            .expect(400)
+                            .then(({ body: { msg } }) => {
+                                expect(msg).toBe("Bad request");
+                            });
+                    });
                 });
-            
+
                 // describe("?p" , () => {
                 //     test("GET 200, returns the first page when queried with 1", () => {
                 //         return request(app)
@@ -915,42 +963,42 @@ describe("/api", () => {
                 //         .expect(200)
                 //         .then(({ body: { articles }}) => {
                 //             expect(articles.length).toBe(10)
-                            
+
                 //             articles.forEach((article) => {
                 //                 expect(article.article_id).toBeGreaterThanOrEqual(1)
                 //                 expect(article.article_id).toBeLessThanOrEqual(10)
                 //             })
                 //         })
                 //     })
-        
+
                 //     test("GET 200, returns the first page when given an empty query", () => {
                 //         return request(app)
                 //         .get("/api/articles?sort_by=article_id&order=ASC&p=")
                 //         .expect(200)
                 //         .then(({ body: { articles }}) => {
                 //             expect(articles.length).toBe(10)
-                            
+
                 //             articles.forEach((article) => {
                 //                 expect(article.article_id).toBeGreaterThanOrEqual(1)
                 //                 expect(article.article_id).toBeLessThanOrEqual(10)
                 //             })
                 //         })
                 //     })
-        
+
                 //     test("GET 200, returns any given page number", () => {
                 //         return request(app)
                 //         .get("/api/articles?sort_by=article_id&order=ASC&limit=2&p=4")
                 //         .expect(200)
                 //         .then(({ body: { articles }}) => {
                 //             expect(articles.length).toBe(2)
-                            
+
                 //             articles.forEach((article) => {
                 //                 expect(article.article_id).toBeGreaterThanOrEqual(7)
                 //                 expect(article.article_id).toBeLessThanOrEqual(8)
                 //             })
                 //         })
                 //     })
-        
+
                 //     test("GET 400, responds with an error message when given query of 0", () => {
                 //         return request(app)
                 //         .get("/api/articles?p=0")
@@ -959,7 +1007,7 @@ describe("/api", () => {
                 //             expect(msg).toBe("Bad request")
                 //         })
                 //     })
-        
+
                 //     test("GET 400, responds with an error message when given query of a negative number", () => {
                 //         return request(app)
                 //         .get("/api/articles?p=-10")
@@ -968,7 +1016,7 @@ describe("/api", () => {
                 //             expect(msg).toBe("Bad request")
                 //         })
                 //     })
-        
+
                 //     test("GET 400, responds with an error message when given an invalid page number", () => {
                 //         return request(app)
                 //         .get("/api/articles?p=not-a-number")
@@ -977,7 +1025,7 @@ describe("/api", () => {
                 //             expect(msg).toBe("Bad request")
                 //         })
                 //     })
-        
+
                 //     test("GET 404, responds with an empty array when given a page that features no results", () => {
                 //         return request(app)
                 //         .get("/api/articles?p=100")
