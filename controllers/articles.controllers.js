@@ -55,8 +55,10 @@ exports.getArticleById = (request, response, next) => {
 
 exports.getCommentsByArticle = (request, response, next) => {
     const articleId = request.params.article_id
+    const limit = request.query.limit || "10"
+    const pageNumber = request.query.p || "1"
 
-    const promises = [selectCommentsByArticle(articleId), selectArticleById(articleId)]
+    const promises = [selectCommentsByArticle(articleId, limit, pageNumber), selectArticleById(articleId)]
 
     return Promise.all(promises)
     .then((result) => {

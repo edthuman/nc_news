@@ -1,10 +1,21 @@
 const db = require("../db/connection")
 
-exports.selectCommentsByArticle = (id) => {
+exports.selectCommentsByArticle = (id, limit, pageNumber) => {
+    let limitQuery = ""
+
+    if (Number(limit) > 0) {
+        limitQuery += `LIMIT ${limit} OFFSET ${limit * (pageNumber - 1)}`
+    } else if (Number(limit) <= 0) {
+        return Promise.reject({ status: 400, msg: "Bad request"})
+    } else if (limit !== undefined) {
+        return Promise.reject({ status: 400, msg: "Bad request"})
+    }
+
     return db.query(`
     SELECT * FROM comments
     WHERE article_id = $1
-    ORDER BY created_at DESC;
+    ORDER BY created_at DESC
+    ${limitQuery};
     `, [id])
     .then(({ rows }) => {
         return rows;

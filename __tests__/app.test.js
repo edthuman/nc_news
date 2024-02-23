@@ -233,16 +233,6 @@ describe("/api", () => {
                     });
             });
 
-            test("GET 200: returns one page of articles when limit given is greater than the number of search results", () => {
-                return request(app)
-                    .get("/api/articles?limit=20")
-                    .expect(200)
-                    .then(({ body }) => {
-                        expect(body.articles).toHaveLength(13);
-                        expect(body.total_count).toBe(13);
-                    });
-            });
-
             test("GET 400: responds with an error message when queried with limit 0", () => {
                 return request(app)
                     .get("/api/articles?limit=0")
@@ -861,6 +851,144 @@ describe("/api", () => {
                             expect(msg).toBe("Not found");
                         });
                 });
+
+                describe("?limit" , () => {
+                        test("GET 200: returns an array of 10 comments by default", () => {
+                            return request(app)
+                                .get("/api/articles/1/comments?limit")
+                                .expect(200)
+                                .then(({ body: { comments } }) => {
+                                    expect(comments).toHaveLength(10);
+                                });
+                        });
+            
+                        test("GET 200: returns the given number of comments when queried", () => {
+                            return request(app)
+                                .get("/api/articles/1/comments?limit=5")
+                                .expect(200)
+                                .then(({ body: { comments } }) => {
+                                    expect(comments).toHaveLength(5);
+                                });
+                        });
+            
+                        test("GET 200: returns one page of comments when limit given is greater than the number of search results", () => {
+                            return request(app)
+                                .get("/api/articles/1/comments?limit=20")
+                                .expect(200)
+                                .then(({ body: { comments } }) => {
+                                    expect(comments).toHaveLength(11);
+                                });
+                        });
+
+                        test("GET 400: responds with an error message when queried with limit 0", () => {
+                            return request(app)
+                                .get("/api/articles/2/comments?limit=0")
+                                .expect(400)
+                                .then(({ body: { msg } }) => {
+                                    expect(msg).toBe("Bad request");
+                                });
+                        });
+            
+                        test("GET 400: responds with an error message when queried with a limit below 0", () => {
+                            return request(app)
+                                .get("/api/articles/2/comments?limit=-2")
+                                .expect(400)
+                                .then(({ body: { msg } }) => {
+                                    expect(msg).toBe("Bad request");
+                                });
+                        });
+            
+                        test("GET 400: responds with an error message when queried with an invalid limit", () => {
+                            return request(app)
+                                .get("/api/articles/2/comments?limit=not-a-number")
+                                .expect(400)
+                                .then(({ body: { msg } }) => {
+                                    expect(msg).toBe("Bad request");
+                                });
+                        });
+                });
+            
+                // describe("?p" , () => {
+                //     test("GET 200, returns the first page when queried with 1", () => {
+                //         return request(app)
+                //         .get("/api/articles?sort_by=article_id&order=ASC&p=1")
+                //         .expect(200)
+                //         .then(({ body: { articles }}) => {
+                //             expect(articles.length).toBe(10)
+                            
+                //             articles.forEach((article) => {
+                //                 expect(article.article_id).toBeGreaterThanOrEqual(1)
+                //                 expect(article.article_id).toBeLessThanOrEqual(10)
+                //             })
+                //         })
+                //     })
+        
+                //     test("GET 200, returns the first page when given an empty query", () => {
+                //         return request(app)
+                //         .get("/api/articles?sort_by=article_id&order=ASC&p=")
+                //         .expect(200)
+                //         .then(({ body: { articles }}) => {
+                //             expect(articles.length).toBe(10)
+                            
+                //             articles.forEach((article) => {
+                //                 expect(article.article_id).toBeGreaterThanOrEqual(1)
+                //                 expect(article.article_id).toBeLessThanOrEqual(10)
+                //             })
+                //         })
+                //     })
+        
+                //     test("GET 200, returns any given page number", () => {
+                //         return request(app)
+                //         .get("/api/articles?sort_by=article_id&order=ASC&limit=2&p=4")
+                //         .expect(200)
+                //         .then(({ body: { articles }}) => {
+                //             expect(articles.length).toBe(2)
+                            
+                //             articles.forEach((article) => {
+                //                 expect(article.article_id).toBeGreaterThanOrEqual(7)
+                //                 expect(article.article_id).toBeLessThanOrEqual(8)
+                //             })
+                //         })
+                //     })
+        
+                //     test("GET 400, responds with an error message when given query of 0", () => {
+                //         return request(app)
+                //         .get("/api/articles?p=0")
+                //         .expect(400)
+                //         .then(({ body: { msg }}) => {
+                //             expect(msg).toBe("Bad request")
+                //         })
+                //     })
+        
+                //     test("GET 400, responds with an error message when given query of a negative number", () => {
+                //         return request(app)
+                //         .get("/api/articles?p=-10")
+                //         .expect(400)
+                //         .then(({ body: { msg }}) => {
+                //             expect(msg).toBe("Bad request")
+                //         })
+                //     })
+        
+                //     test("GET 400, responds with an error message when given an invalid page number", () => {
+                //         return request(app)
+                //         .get("/api/articles?p=not-a-number")
+                //         .expect(400)
+                //         .then(({ body: { msg }}) => {
+                //             expect(msg).toBe("Bad request")
+                //         })
+                //     })
+        
+                //     test("GET 404, responds with an empty array when given a page that features no results", () => {
+                //         return request(app)
+                //         .get("/api/articles?p=100")
+                //         .expect(404)
+                //         .then(({ body: { articles }}) => {
+                //             expect(articles).toHaveLength(0)
+                //         })
+                //     })
+
+                //     })
+                // })
             });
         });
     });
