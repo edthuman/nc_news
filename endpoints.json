@@ -96,6 +96,11 @@
             }
         }
     },
+    "DELETE /api/articles/:article_id": {
+        "description": "deletes an article with given comment_id, serves no response",
+        "queries": [],
+        "exampleResponse": {}
+    },
     "GET /api/articles/:article_id/comments": {
         "description": "serves an array of comments for the article with given article_id",
         "queries": ["limit", "p"],
