@@ -755,6 +755,40 @@ describe("/api", () => {
                     });
             });
 
+            test("DELETE 204: responds with no content and deletes the article with given article_id" , () => {
+                return request(app)
+                .delete("/api/articles/2")
+                .expect(204)
+                .then(() => {
+                    return request(app).get("/api/articles")
+                })
+                .then(({ body: { articles }}) => {
+                    expect(articles).toHaveLength(12);
+
+                    articles.forEach((article) => {
+                        expect(article.article_id).not.toBe(2)
+                    })
+                });
+            })
+
+            test("DELETE 404: responds with an error message when given a non-existent - Not found" , () => {
+                return request(app)
+                .delete("/api/articles/200")
+                .expect(404)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Not found")
+                })
+            })
+
+            test("DELETE 400: responds with an error message when given an invalid article_id - Bad request" , () => {
+                return request(app)
+                .delete("/api/articles/not-a-number")
+                .expect(400)
+                .then(({ body: { msg }}) => {
+                    expect(msg).toBe("Bad request")
+                })
+            })
+
             describe("/comments", () => {
                 test("GET 200: responds with an array of comments for given article, sorted most recent first", () => {
                     return request(app)
