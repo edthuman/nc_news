@@ -9,6 +9,13 @@
             "topics": [{ "slug": "football", "description": "Footie!" }]
         }
     },
+    "POST /api/topics": {
+        "description": "posts a topic, serves the added topic object",
+        "queries": [],
+        "exampleResponse": {
+            "topic": [{ "slug": "football", "description": "Footie!" }]
+        }
+    },
     "GET /api/articles": {
         "description": "serves an array of all articles",
         "queries": ["author", "topic", "sort_by", "order", "limit", "p"],
@@ -42,7 +49,7 @@
         "description": "posts an article, serves the added article object",
         "queries": [],
         "exampleResponse": {
-            "articles": [
+            "article": [
                 {
                     "title": "Seafood substitutions are increasing",
                     "topic": "cooking",
