@@ -4,9 +4,7 @@ NC News is an API which allows clients to interact with a database of articles. 
 
 ### Hosted API
 
-Link to API: https://northcoders-news-c5lb.onrender.com
-
-To see a description of the endpoints available, go to: https://northcoders-news-c5lb.onrender.com/api
+Link to API: https://northcoders-news-c5lb.onrender.com/api
 
 ### Cloning The Repository
 
