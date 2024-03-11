@@ -97,7 +97,7 @@
         }
     },
     "DELETE /api/articles/:article_id": {
-        "description": "deletes an article with given comment_id, serves no response",
+        "description": "deletes an article with given article_id, serves no response",
         "queries": [],
         "exampleResponse": {}
     },
