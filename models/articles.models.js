@@ -1,7 +1,11 @@
 const db = require("../db/connection");
 
 exports.selectAllArticles = (topic, sort_by, order, limit, pageNumber) => {
-    const validTopics = ["mitch", "cats", "paper"];
+    return db.query(`
+    SELECT slug FROM topics
+    `).then((response) => {
+    const validTopics = response.rows.map((topic) => topic.slug)
+
     const validSortOptions = [
         "author",
         "title",
@@ -62,6 +66,7 @@ exports.selectAllArticles = (topic, sort_by, order, limit, pageNumber) => {
 
         return [articles, total_count];
     });
+    })
 };
 
 exports.selectArticleById = (id) => {
