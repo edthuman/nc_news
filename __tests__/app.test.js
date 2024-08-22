@@ -990,87 +990,85 @@ describe("/api", () => {
                     });
                 });
 
-                // describe("?p" , () => {
-                //     test("GET 200, returns the first page when queried with 1", () => {
-                //         return request(app)
-                //         .get("/api/articles?sort_by=article_id&order=ASC&p=1")
-                //         .expect(200)
-                //         .then(({ body: { articles }}) => {
-                //             expect(articles.length).toBe(10)
+                describe("?p" , () => {
+                    test("GET 200, returns the first page when queried with 1", () => {
+                        return request(app)
+                        .get("/api/articles?sort_by=article_id&order=ASC&p=1")
+                        .expect(200)
+                        .then(({ body: { articles }}) => {
+                            expect(articles.length).toBe(10)
 
-                //             articles.forEach((article) => {
-                //                 expect(article.article_id).toBeGreaterThanOrEqual(1)
-                //                 expect(article.article_id).toBeLessThanOrEqual(10)
-                //             })
-                //         })
-                //     })
+                            articles.forEach((article) => {
+                                expect(article.article_id).toBeGreaterThanOrEqual(1)
+                                expect(article.article_id).toBeLessThanOrEqual(10)
+                            })
+                        })
+                    })
 
-                //     test("GET 200, returns the first page when given an empty query", () => {
-                //         return request(app)
-                //         .get("/api/articles?sort_by=article_id&order=ASC&p=")
-                //         .expect(200)
-                //         .then(({ body: { articles }}) => {
-                //             expect(articles.length).toBe(10)
+                    test("GET 200, returns the first page when given an empty query", () => {
+                        return request(app)
+                        .get("/api/articles?sort_by=article_id&order=ASC&p=")
+                        .expect(200)
+                        .then(({ body: { articles }}) => {
+                            expect(articles.length).toBe(10)
 
-                //             articles.forEach((article) => {
-                //                 expect(article.article_id).toBeGreaterThanOrEqual(1)
-                //                 expect(article.article_id).toBeLessThanOrEqual(10)
-                //             })
-                //         })
-                //     })
+                            articles.forEach((article) => {
+                                expect(article.article_id).toBeGreaterThanOrEqual(1)
+                                expect(article.article_id).toBeLessThanOrEqual(10)
+                            })
+                        })
+                    })
 
-                //     test("GET 200, returns any given page number", () => {
-                //         return request(app)
-                //         .get("/api/articles?sort_by=article_id&order=ASC&limit=2&p=4")
-                //         .expect(200)
-                //         .then(({ body: { articles }}) => {
-                //             expect(articles.length).toBe(2)
+                    test("GET 200, returns any given page number", () => {
+                        return request(app)
+                        .get("/api/articles?sort_by=article_id&order=ASC&limit=2&p=4")
+                        .expect(200)
+                        .then(({ body: { articles }}) => {
+                            expect(articles.length).toBe(2)
 
-                //             articles.forEach((article) => {
-                //                 expect(article.article_id).toBeGreaterThanOrEqual(7)
-                //                 expect(article.article_id).toBeLessThanOrEqual(8)
-                //             })
-                //         })
-                //     })
+                            articles.forEach((article) => {
+                                expect(article.article_id).toBeGreaterThanOrEqual(7)
+                                expect(article.article_id).toBeLessThanOrEqual(8)
+                            })
+                        })
+                    })
 
-                //     test("GET 400, responds with an error message when given query of 0", () => {
-                //         return request(app)
-                //         .get("/api/articles?p=0")
-                //         .expect(400)
-                //         .then(({ body: { msg }}) => {
-                //             expect(msg).toBe("Bad request")
-                //         })
-                //     })
+                    test("GET 400, responds with an error message when given query of 0", () => {
+                        return request(app)
+                        .get("/api/articles?p=0")
+                        .expect(400)
+                        .then(({ body: { msg }}) => {
+                            expect(msg).toBe("Bad request")
+                        })
+                    })
 
-                //     test("GET 400, responds with an error message when given query of a negative number", () => {
-                //         return request(app)
-                //         .get("/api/articles?p=-10")
-                //         .expect(400)
-                //         .then(({ body: { msg }}) => {
-                //             expect(msg).toBe("Bad request")
-                //         })
-                //     })
+                    test("GET 400, responds with an error message when given query of a negative number", () => {
+                        return request(app)
+                        .get("/api/articles?p=-10")
+                        .expect(400)
+                        .then(({ body: { msg }}) => {
+                            expect(msg).toBe("Bad request")
+                        })
+                    })
 
-                //     test("GET 400, responds with an error message when given an invalid page number", () => {
-                //         return request(app)
-                //         .get("/api/articles?p=not-a-number")
-                //         .expect(400)
-                //         .then(({ body: { msg }}) => {
-                //             expect(msg).toBe("Bad request")
-                //         })
-                //     })
+                    test("GET 400, responds with an error message when given an invalid page number", () => {
+                        return request(app)
+                        .get("/api/articles?p=not-a-number")
+                        .expect(400)
+                        .then(({ body: { msg }}) => {
+                            expect(msg).toBe("Bad request")
+                        })
+                    })
 
-                //     test("GET 404, responds with an empty array when given a page that features no results", () => {
-                //         return request(app)
-                //         .get("/api/articles?p=100")
-                //         .expect(404)
-                //         .then(({ body: { articles }}) => {
-                //             expect(articles).toHaveLength(0)
-                //         })
-                //     })
-
-                //     })
-                // })
+                    test("GET 404, responds with an empty array when given a page that features no results", () => {
+                        return request(app)
+                        .get("/api/articles?p=100")
+                        .expect(404)
+                        .then(({ body: { articles }}) => {
+                            expect(articles).toHaveLength(0)
+                        })
+                    })
+                })
             });
         });
     });
@@ -1282,18 +1280,8 @@ describe("/api", () => {
                         expect(msg).toBe("Not found");
                     });
             });
-            //no input - returns all
+            //no input - returns all users
         });
-
-        /*
-/api/users/:username.
-return a user by username.
-
-returns with:
-username
-avatar_url
-name
-*/
     });
 });
 
