@@ -1282,18 +1282,8 @@ describe("/api", () => {
                         expect(msg).toBe("Not found");
                     });
             });
-            //no input - returns all
+            //no input - returns all users
         });
-
-        /*
-/api/users/:username.
-return a user by username.
-
-returns with:
-username
-avatar_url
-name
-*/
     });
 });
 
